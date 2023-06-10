@@ -12,6 +12,8 @@
 # %%
 import numpy as np
 import pandas as pd
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import OneClassSVM
 from sklearn.linear_model import SGDOneClassSVM
 from sklearn.neighbors import LocalOutlierFactor
@@ -64,7 +66,9 @@ def run_sim(n_col_extra):
             model = OneClassSVM(kernel = kernel)
             models.append(model)
         
-        models.append(SGDOneClassSVM())
+        # Docs say to model needs to standardization.
+        model = make_pipeline(StandardScaler(), SGDOneClassSVM())
+        models.append(model)
 
         distances = ['minkowski', 'euclidean', 'cosine']
         for distance in distances:
@@ -100,6 +104,7 @@ def run_sim(n_col_extra):
     return finalResultDF
 
 # %%
+np.random.seed(0)
 pieces = []
 for n_col_extra in range(0, 11):
     print(n_col_extra)
@@ -111,6 +116,7 @@ resultDF.head()
 resultDF.to_csv(path_or_buf = 'S:\\Python\\projects\\anomaly_detection\\data\\results.csv', index = False)
 
 # %%
+np.random.seed(42)
 X_test, y_test = generate_data(50000, 0)
 exampleDF = {'LABEL':y_test, 'X1':X_test[:,0], 'X2':X_test[:,1]}
 exampleDF = pd.DataFrame(data = exampleDF)

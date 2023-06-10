@@ -43,14 +43,14 @@ between both cases.
 
 ![](README_files/figure-commonmark/cell-2-output-1.png)
 
-    <ggplot: (134051584693)>
+    <ggplot: (131023755445)>
 
 It is only when both variables are considered together that an obvious
 separation exists.
 
 ![](README_files/figure-commonmark/cell-3-output-1.png)
 
-    <ggplot: (134053420788)>
+    <ggplot: (131023803516)>
 
 To vary the challenge, zero to ten extra variables are added. By design,
 these variables have no separation between the two cases. The idea is to
@@ -72,7 +72,7 @@ SVM with rbf.
 
 ![](README_files/figure-commonmark/cell-4-output-1.png)
 
-    <ggplot: (134053197325)>
+    <ggplot: (131025362149)>
 
 Measured by precision (proportion of predicted outliers that are
 actually outliers), Local Outlier Factor with euclidean or minikowski
@@ -81,7 +81,7 @@ precision.
 
 ![](README_files/figure-commonmark/cell-5-output-1.png)
 
-    <ggplot: (134053714077)>
+    <ggplot: (131025881754)>
 
 Taking both metrics together, the Local Outlier Factor with cosine
 similarity model is best at least for these data.

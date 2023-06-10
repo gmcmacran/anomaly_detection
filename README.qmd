@@ -19,15 +19,15 @@ Models:
 * One class SVM with sigmoid kernel
 * Local Outlier Factor using minikowski distance
 * Local Outlier Factor using euclidean distance
-* Local Outlier Factor using consine similarity
+* Local Outlier Factor using cosine similarity
 
-Best is determined by which metric is more important. The SVM model with radial basis function kernel had the best recall. The local outlier factor model had the best precision. The other three models performed poorly in both metrics. The SVM model has the major advantage of training occurs before prediction time.
-
+The main outcome of this simulation is Local Outlier Factor using cosine similarity is the best model overall for these data. Horizontal scaling is necessary for production. If this is not an option, the SVM model with radial basis function as the kernel is the next best option.
 
 # Data Overview
 In this simulation, data comes from four two-dimensional Gaussian random variables. The center of each random variable is at a corner of the unit square. Data in the first and third quartile of the xy plane are consider typical, and data from the second and fourth quartile are consider outliers.
 
 Looking at each variable separately, the distributions are identical between both cases.
+
 
 ```{python}
 #| echo: false
@@ -70,7 +70,7 @@ To vary the challenge, zero to ten extra variables are added. By design, these v
 Each setting of the simulation is repeated 10 times, and performance metrics are averaged to reduce variability.
 
 # Results
-Measured by recall (proportion of outliers found), the SVM model with the radial basis function kernel is best. The number of extra variables does not affect performance. Local outlier factor comes in second. For this model, performance degrades as the number of extra variables increases. All other models are around 50% regardless of the number of extra variables.
+Measured by recall (proportion of outliers found), the SVM model with the radial basis function kernel and Local Outlier Factor with cosine similarity model have nearly identical performance. Interestingly, the linear approximation SVM has very different performance then the real SVM with rbf.
 
 ```{python}
 #| echo: false
@@ -91,7 +91,7 @@ graph = (
 graph
 ```
 
-Measured by precision (proportion of predicted outliers that are actually outliers), local outlier factor is best. The number of extra variables does not affect performance. The SVM model with the radial basis function kernel comes in second this time. All other models are around 50% regardless of the number of extra variables.
+Measured by precision (proportion of predicted outliers that are actually outliers), Local Outlier Factor with euclidean or minikowski distance are best. The cosine similarity model has nearly the same precision.
 
 ```{python}
 #| echo: false
@@ -107,7 +107,7 @@ graph = (
 graph
 ```
 
-We have a classic trade-off. Is recall or precision more important? If finding the most outliers possible (recall) is more important and many false positives is acceptable, the SVM model is best. If false positives should be minimized (precision) at the expense of many outliers being missed, local outlier factor is best.
+Taking both metrics together, the Local Outlier Factor with cosine similarity model is best at least for these data.
 
 # Only One Class
 In the real word, anomaly detection models can be trained without a single example of an outlier. This is a double-edged sword. Given 1,000 outliers, there could be 1,000 distinct definitions of why the data points are outliers. Learning these 1,000 definitions using just one example each is impossible. In addition, new definitions may present themselves after model training. The ability to train a model without providing a single example of an outlier is a major advantage.
@@ -117,11 +117,10 @@ Because there are no real examples of outliers, it is impossible to know if the 
 Even if performance is great for the synthetic data, it does not prove real world outliers will be identified. There are two options. Either accept this blind spot or find examples of real world outliers prior to model deployment. There is no work-around for quality data.
 
 # Scalability
-There is a scalability issue. Local outlier factor is variation of k-nearest neighbors. Therefore the model essentially does nothing during the .fit call and only learns at prediction time. Every call to .predict is associated with learning. Prediction calculations are not going to be fast. 
+Local outlier factor is variation of k-nearest neighbors. Therefore the model essentially does nothing during the .fit call and only learns at prediction time. Every call to .predict is associated with learning. Prediction calculations are not going to be fast.
 
-Luckily, computation is done on a per-row basis of prediction data. This means compute can be spread across CPU threads and even multiple CPUs. Serverless horizontal scaling with the cloud is necessary for enterprise scale.
+Luckily, computation is done on a per-row basis of prediction data. This means it can be spread across CPU threads and even multiple CPUs. Serverless horizontal scaling with the cloud is necessary for enterprise scale.
 
 For SVMs, prediction calculations do not require learning. Model training can be done outside of production. However, model training involves a single threaded algorithm with quadratic in sample size complexity. Thus training time grows very quickly with respect to sample size.
 
-The SGDOneClassSVM model in scikit-learn is a highly accurate approximation to SVM with the rbf kernel. This approximate model has linear training time instead of quadratic.
-
+The SGDOneClassSVM model in scikit-learn approximates the SVM model with the rbf kernel. This model has linear complexity instead of quadratic. Unfortunately, the approximation did not work well for these data.
